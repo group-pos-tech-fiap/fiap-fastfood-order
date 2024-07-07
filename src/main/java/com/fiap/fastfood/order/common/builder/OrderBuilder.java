@@ -35,9 +35,7 @@ public class OrderBuilder {
                 .totalValue(orm.getTotalValue())
                 .status(orm.getStatus())
                 .paymentStatus(orm.getPaymentStatus())
-                .items(
-                        orm.getItems().stream().map(ItemBuilder::fromOrmToDomain).collect(Collectors.toList())
-                )
+                .items(orm.getItems().stream().map(ItemBuilder::fromOrmToDomain).collect(Collectors.toList()))
                 .build();
     }
 
@@ -49,9 +47,7 @@ public class OrderBuilder {
                 .totalValue(order.getTotalValue())
                 .status(order.getStatus())
                 .paymentStatus(order.getPaymentStatus())
-                .items(
-                        order.getItems().stream().map(ItemBuilder::fromDomainToOrm).collect(Collectors.toList())
-                )
+                .items(order.getItems().stream().map(ItemBuilder::fromDomainToOrm).collect(Collectors.toList()))
                 .build();
     }
 }

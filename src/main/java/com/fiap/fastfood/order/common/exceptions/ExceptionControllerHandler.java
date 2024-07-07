@@ -1,6 +1,5 @@
 package com.fiap.fastfood.order.common.exceptions;
 
-import com.fiap.fastfood.order.common.exceptions.custom.BusinessException;
 import com.fiap.fastfood.order.common.exceptions.custom.EntityNotFoundException;
 import com.fiap.fastfood.order.common.exceptions.model.ExceptionDetails;
 import org.springframework.http.HttpStatus;
@@ -14,23 +13,6 @@ import java.util.Date;
 
 @RestControllerAdvice
 public class ExceptionControllerHandler extends ResponseEntityExceptionHandler {
-
-    //TODO: ADICIONAR EXCEÇÕES CUSTOMIZADAS QUE FOREM FEITAS
-
-    @ExceptionHandler(value = {BusinessException.class})
-    public ResponseEntity<ExceptionDetails> resourceException(BusinessException ex, WebRequest request) {
-
-        final var message = new ExceptionDetails(
-                "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
-                "The request could not be completed due to a conflict.",
-                ex.getCode(),
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                new Date(),
-                ex.getErrors());
-
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
-    }
 
     @ExceptionHandler(value = {EntityNotFoundException.class})
     public ResponseEntity<ExceptionDetails> resourceException(EntityNotFoundException ex, WebRequest request) {
@@ -46,7 +28,6 @@ public class ExceptionControllerHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
     }
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleUncaughtException(Exception ex, WebRequest request) {
@@ -65,5 +46,4 @@ public class ExceptionControllerHandler extends ResponseEntityExceptionHandler {
 
         return handleExceptionInternal(ex, message, null, status, request);
     }
-
 }

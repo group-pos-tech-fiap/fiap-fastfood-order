@@ -63,7 +63,7 @@ public class OrderGatewayImpl implements OrderGateway {
                 .collect(Collectors.toList());
     }
 
-    private int getOrderStatusPriority(OrderStatus status) {
+    public int getOrderStatusPriority(OrderStatus status) {
         switch (status) {
             case READY:
                 return 1;

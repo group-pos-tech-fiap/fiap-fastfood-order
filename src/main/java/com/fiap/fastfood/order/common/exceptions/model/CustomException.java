@@ -16,10 +16,4 @@ public class CustomException extends Exception {
         super(message);
         this.code = code;
     }
-
-    public CustomException(String code, String message, List<CustomError> customErrors) {
-        super(message);
-        this.code = code;
-        this.errors = customErrors;
-    }
 }
