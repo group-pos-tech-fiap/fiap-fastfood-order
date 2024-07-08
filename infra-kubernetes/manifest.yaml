@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiap-fastfood-order-deployment
+  namespace: fiap-pos-tech
+spec:
+  selector:
+    matchLabels:
+      app: fiap-fastfood-order
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fiap-fastfood-order
+    spec:
+      containers:
+        - name: fiap-pos-tech-fastfood
+          image: 067184771399.dkr.ecr.us-east-1.amazonaws.com/fiap-pos-tech-fastfood #pegar uri do repositório ECR
+          imagePullPolicy: Always
+          #        - name: fastfood-fiap-api
+          #          image: ghbalbuquerque/fastfood-fiap-api:latest # Dockerhub
+          resources:
+            requests:
+              cpu: "200m"  # Requisição de CPU inicial
+              memory: "512Mi"
+            limits:
+              cpu: "500m"  # Limite de CPU
+              memory: "1Gi"
+          env:
+            - name: DB_HOST
+              value: "mongodb+srv://admin:FIAPauth123_@db-fiap-fastfood-order.udr9jzk.mongodb.net/?retryWrites=true&w=majority&appName=db-fiap-fastfood-order"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fiap-fastfood-order-service
+  namespace: fiap-pos-tech
+spec:
+  type: NodePort #NodePort ou LoadBalancer ≥ cria um classic LB
+  selector:
+    app: fiap-fastfood-order
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30007
+
+
+
+
