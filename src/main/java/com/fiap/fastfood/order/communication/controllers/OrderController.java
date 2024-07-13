@@ -2,6 +2,7 @@ package com.fiap.fastfood.order.communication.controllers;
 
 import com.fiap.fastfood.order.common.builder.OrderBuilder;
 import com.fiap.fastfood.order.common.dto.request.CreateOrderRequest;
+import com.fiap.fastfood.order.common.dto.request.UpdateOrderStatusRequest;
 import com.fiap.fastfood.order.common.dto.response.GetOrderPaymentStatusResponse;
 import com.fiap.fastfood.order.common.dto.response.GetOrderResponse;
 import com.fiap.fastfood.order.common.exceptions.custom.EntityNotFoundException;
@@ -47,5 +48,10 @@ public class OrderController {
     @PostMapping(value="/{orderId}/perform-payment")
     public ResponseEntity<Order> performPayment(@PathVariable String orderId) throws EntityNotFoundException {
         return ResponseEntity.ok(useCase.performPayment(orderId));
+    }
+
+    @PutMapping(value = "/status")
+    public ResponseEntity<Order> updateOrderStatus(@RequestBody UpdateOrderStatusRequest request) throws EntityNotFoundException {
+        return ResponseEntity.ok(useCase.updateOrderStatus(request.orderId(), request.status()));
     }
 }

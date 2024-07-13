@@ -38,4 +38,11 @@ public class OrderUseCaseImpl implements OrderUseCase {
     public Order performPayment(String orderId) throws EntityNotFoundException {
         return orderGateway.performPayment(orderId);
     }
+
+    @Override
+    public Order updateOrderStatus(String orderId, OrderStatus status) throws EntityNotFoundException {
+        var order = getOrderById(orderId);
+        order.setStatus(status);
+        return orderGateway.saveOrder(order);
+    }
 }

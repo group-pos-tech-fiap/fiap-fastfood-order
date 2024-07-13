@@ -34,6 +34,11 @@ Tecnologias utilizadas:
 * Minikube
 * AWS CLI
 
+### 🔌 Integracao dos microserviçoes
+A integração dos microservicos é realizada através do FeignClient.
+
+    > Pagamento/Payment: com.fiap.fastfood.order.external.feign.PaymentClient
+
 ### 💿 Cobertura de teste
 ![](misc/test-coverage.png)
 
