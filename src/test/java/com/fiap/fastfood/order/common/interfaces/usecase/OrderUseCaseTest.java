@@ -7,6 +7,9 @@ import com.fiap.fastfood.order.core.entity.Order;
 import com.fiap.fastfood.order.core.entity.OrderPaymentStatus;
 import com.fiap.fastfood.order.core.entity.OrderStatus;
 import com.fiap.fastfood.order.core.usecase.OrderUseCaseImpl;
+import com.fiap.fastfood.order.external.feign.PaymentClient;
+import com.fiap.fastfood.order.external.feign.models.PaymentRequest;
+import com.fiap.fastfood.order.external.feign.models.PaymentResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +31,9 @@ class OrderUseCaseTest {
 
     @Mock
     private OrderGateway orderGateway;
+
+    @Mock
+    private PaymentClient paymentClient;
 
     @InjectMocks
     private OrderUseCaseImpl orderUseCase;
@@ -82,14 +88,35 @@ class OrderUseCaseTest {
     }
 
     @Test
-    void performPayment() throws EntityNotFoundException {
-        String orderId = "10";
-        when(orderGateway.performPayment(orderId)).thenReturn(sampleOrder);
+    void performPayment_Success() throws EntityNotFoundException {
+        var orderId = "1010";
+        var nsuPayment = "10893741098234";
+        var paymentResponse = new PaymentResponse(nsuPayment);
 
-        var performedOrder = orderUseCase.performPayment(orderId);
+        when(orderGateway.getOrderById(orderId)).thenReturn(sampleOrder);
+        when(paymentClient.performPayment(any(PaymentRequest.class))).thenReturn(paymentResponse);
+        when(orderGateway.saveOrder(any(Order.class))).thenReturn(sampleOrder);
 
-        assertEquals(sampleOrder.getId(), performedOrder.getId());
-        verify(orderGateway, times(1)).performPayment(orderId);
+        var order = orderUseCase.performPayment(sampleOrder.getId());
+
+        assertEquals(OrderPaymentStatus.APPROVED, order.getPaymentStatus());
+        verify(paymentClient, times(1)).performPayment(any(PaymentRequest.class));
+        verify(orderGateway, times(1)).saveOrder(any(Order.class));
+    }
+
+    @Test
+    void performPayment_Failure() throws EntityNotFoundException {
+        var orderId = "1010";
+
+        when(orderGateway.getOrderById(orderId)).thenReturn(sampleOrder);
+        when(paymentClient.performPayment(any(PaymentRequest.class))).thenReturn(new PaymentResponse());
+        when(orderGateway.saveOrder(any(Order.class))).thenReturn(sampleOrder);
+
+        var order = orderUseCase.performPayment(sampleOrder.getId());
+
+        assertEquals(OrderPaymentStatus.REJECTED, order.getPaymentStatus());
+        verify(paymentClient, times(1)).performPayment(any(PaymentRequest.class));
+        verify(orderGateway, times(1)).saveOrder(any(Order.class));
     }
 
     private Order createSampleOrder() {

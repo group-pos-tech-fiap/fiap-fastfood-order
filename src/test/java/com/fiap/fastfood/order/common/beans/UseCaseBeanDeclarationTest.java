@@ -3,6 +3,7 @@ package com.fiap.fastfood.order.common.beans;
 import com.fiap.fastfood.order.common.interfaces.gateway.OrderGateway;
 import com.fiap.fastfood.order.common.interfaces.usecase.OrderUseCase;
 import com.fiap.fastfood.order.core.usecase.OrderUseCaseImpl;
+import com.fiap.fastfood.order.external.feign.PaymentClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,10 +18,14 @@ class UseCaseBeanDeclarationTest {
     @Mock
     private OrderGateway orderGateway;
 
+    @Mock
+    private PaymentClient paymentClient;
+
     @Test
     void testOrderUseCaseBean() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.registerBean(OrderGateway.class, () -> orderGateway);
+        context.registerBean(PaymentClient.class, () -> paymentClient);
         context.register(UseCaseBeanDeclaration.class);
         context.refresh();
 

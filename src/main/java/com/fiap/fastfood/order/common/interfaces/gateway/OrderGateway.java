@@ -9,5 +9,4 @@ public interface OrderGateway {
     List<Order> listOrder();
     Order saveOrder(Order order);
     Order getOrderById(String id) throws EntityNotFoundException;
-    Order performPayment(String orderId) throws EntityNotFoundException;
 }

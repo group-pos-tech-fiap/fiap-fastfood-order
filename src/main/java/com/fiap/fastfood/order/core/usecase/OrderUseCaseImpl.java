@@ -6,15 +6,19 @@ import com.fiap.fastfood.order.common.interfaces.usecase.OrderUseCase;
 import com.fiap.fastfood.order.core.entity.Order;
 import com.fiap.fastfood.order.core.entity.OrderPaymentStatus;
 import com.fiap.fastfood.order.core.entity.OrderStatus;
+import com.fiap.fastfood.order.external.feign.PaymentClient;
+import com.fiap.fastfood.order.external.feign.models.PaymentRequest;
 
 import java.util.List;
 
 public class OrderUseCaseImpl implements OrderUseCase {
 
     private final OrderGateway orderGateway;
+    private final PaymentClient paymentClient;
 
-    public OrderUseCaseImpl(OrderGateway orderGateway) {
+    public OrderUseCaseImpl(OrderGateway orderGateway, PaymentClient paymentClient) {
         this.orderGateway = orderGateway;
+        this.paymentClient = paymentClient;
     }
 
     @Override
@@ -36,7 +40,20 @@ public class OrderUseCaseImpl implements OrderUseCase {
 
     @Override
     public Order performPayment(String orderId) throws EntityNotFoundException {
-        return orderGateway.performPayment(orderId);
+        var order = getOrderById(orderId);
+        var paymentRequest = new PaymentRequest(order.getId(), order.getTotalValue());
+        try {
+            var response = paymentClient.performPayment(paymentRequest);
+            if (response != null && response.getNsu() != null) {
+                order.setNsuPayment(response.getNsu());
+                order.setPaymentStatus(OrderPaymentStatus.APPROVED);
+            } else {
+                order.setPaymentStatus(OrderPaymentStatus.REJECTED);
+            }
+        } catch (Exception e) {
+            order.setPaymentStatus(OrderPaymentStatus.REJECTED);
+        }
+        return orderGateway.saveOrder(order);
     }
 
     @Override

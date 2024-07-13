@@ -5,10 +5,8 @@ import com.fiap.fastfood.order.common.exceptions.custom.EntityNotFoundException;
 import com.fiap.fastfood.order.common.interfaces.datasources.SpringDataMongoOrderRepository;
 import com.fiap.fastfood.order.common.interfaces.gateway.OrderGateway;
 import com.fiap.fastfood.order.core.entity.Order;
-import com.fiap.fastfood.order.core.entity.OrderPaymentStatus;
 import com.fiap.fastfood.order.core.entity.OrderStatus;
 import com.fiap.fastfood.order.external.feign.PaymentClient;
-import com.fiap.fastfood.order.external.feign.models.PaymentRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -38,20 +36,6 @@ public class OrderGatewayImpl implements OrderGateway {
         return repository.findById(id)
                 .map(OrderBuilder::fromOrmToDomain)
                 .orElseThrow(() -> new EntityNotFoundException("ORDER-01", String.format("Order with ID %s not found", id)));
-    }
-
-    @Override
-    public Order performPayment(String orderId) throws EntityNotFoundException {
-        var order = getOrderById(orderId);
-        var paymentRequest = new PaymentRequest(order.getId(), order.getTotalValue());
-        try {
-            var response = paymentClient.performPayment(paymentRequest);
-            order.setNsuPayment(response.getNsu());
-            order.setPaymentStatus(OrderPaymentStatus.APPROVED);
-        } catch (Exception e) {
-            order.setPaymentStatus(OrderPaymentStatus.REJECTED);
-        }
-        return saveOrder(order);
     }
 
     @Override

@@ -8,9 +8,6 @@ import com.fiap.fastfood.order.core.entity.Item;
 import com.fiap.fastfood.order.core.entity.Order;
 import com.fiap.fastfood.order.core.entity.OrderPaymentStatus;
 import com.fiap.fastfood.order.core.entity.OrderStatus;
-import com.fiap.fastfood.order.external.feign.PaymentClient;
-import com.fiap.fastfood.order.external.feign.models.PaymentRequest;
-import com.fiap.fastfood.order.external.feign.models.PaymentResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +31,6 @@ class OrderGatewayTest {
 
     @Mock
     private SpringDataMongoOrderRepository repository;
-
-    @Mock
-    private PaymentClient paymentClient;
 
     @InjectMocks
     private OrderGatewayImpl orderGateway;
@@ -77,39 +71,6 @@ class OrderGatewayTest {
 
         assertThrows(EntityNotFoundException.class, () -> orderGateway.getOrderById(sampleOrder.getId()));
         verify(repository, times(1)).findById(anyString());
-    }
-
-    @Test
-    void performPayment_Success() throws EntityNotFoundException {
-        var nsuPayment = "10893741098234";
-        var paymentResponse = new PaymentResponse();
-        paymentResponse.setNsu(nsuPayment);
-        sampleOrder.setPaymentStatus(OrderPaymentStatus.APPROVED);
-        sampleOrder.setNsuPayment(nsuPayment);
-
-        when(repository.findById(anyString())).thenReturn(Optional.of(OrderBuilder.fromDomainToOrm(sampleOrder)));
-        when(paymentClient.performPayment(any(PaymentRequest.class))).thenReturn(paymentResponse);
-        when(repository.save(any())).thenReturn(OrderBuilder.fromDomainToOrm(sampleOrder));
-
-        var order = orderGateway.performPayment(sampleOrder.getId());
-
-        assertEquals(OrderPaymentStatus.APPROVED, order.getPaymentStatus());
-        verify(paymentClient, times(1)).performPayment(any(PaymentRequest.class));
-        verify(repository, times(1)).save(any());
-    }
-
-    @Test
-    void performPayment_Failure() throws EntityNotFoundException {
-        sampleOrder.setPaymentStatus(OrderPaymentStatus.REJECTED);
-        when(repository.findById(anyString())).thenReturn(Optional.of(OrderBuilder.fromDomainToOrm(sampleOrder)));
-        when(repository.save(any())).thenReturn(OrderBuilder.fromDomainToOrm(sampleOrder));
-        when(paymentClient.performPayment(any(PaymentRequest.class))).thenThrow(new RuntimeException());
-
-        var paidOrder = orderGateway.performPayment(sampleOrder.getId());
-
-        assertEquals(OrderPaymentStatus.REJECTED, paidOrder.getPaymentStatus());
-        verify(paymentClient, times(1)).performPayment(any(PaymentRequest.class));
-        verify(repository, times(1)).save(any());
     }
 
     @Test
