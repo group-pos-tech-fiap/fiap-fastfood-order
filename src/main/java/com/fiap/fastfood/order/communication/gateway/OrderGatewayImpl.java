@@ -6,7 +6,6 @@ import com.fiap.fastfood.order.common.interfaces.datasources.SpringDataMongoOrde
 import com.fiap.fastfood.order.common.interfaces.gateway.OrderGateway;
 import com.fiap.fastfood.order.core.entity.Order;
 import com.fiap.fastfood.order.core.entity.OrderStatus;
-import com.fiap.fastfood.order.external.feign.PaymentClient;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +17,9 @@ import java.util.stream.Collectors;
 public class OrderGatewayImpl implements OrderGateway {
 
     private final SpringDataMongoOrderRepository repository;
-    private final PaymentClient paymentClient;
 
-    public OrderGatewayImpl(SpringDataMongoOrderRepository repository, PaymentClient paymentClient) {
+    public OrderGatewayImpl(SpringDataMongoOrderRepository repository) {
         this.repository = repository;
-        this.paymentClient = paymentClient;
     }
 
     @Override
